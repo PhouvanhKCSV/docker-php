@@ -1,5 +1,5 @@
 #https://github.com/prooph/docker-files/blob/master/php/7.4-fpm
-FROM php:7.4.4-zts-alpine3.11
+FROM php:7.4.5-zts-alpine3.11
 
 ENV PHPIZE_DEPS \
     autoconf \
