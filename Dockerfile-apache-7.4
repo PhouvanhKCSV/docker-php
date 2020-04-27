@@ -55,8 +55,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --version=1.10.1 --insta
 ENV LD_LIBRARY_PATH=/opt/oracle/instantclient
 ENV ORACLE_HOME=/opt/oracle/instantclient
 
-COPY ../../files/instantclient-basic-linux.x64-12.1.0.2.0.zip /opt/oracle/
-COPY ../../files/instantclient-sdk-linux.x64-12.1.0.2.0.zip /opt/oracle/
+COPY ./files/instantclient-basic-linux.x64-12.1.0.2.0.zip /opt/oracle/
+COPY ./files/instantclient-sdk-linux.x64-12.1.0.2.0.zip /opt/oracle/
 
 RUN unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip -d /opt/oracle/ \
     && unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip -d /opt/oracle/ \
