@@ -20,7 +20,7 @@ ENV PHPIZE_DEPS \
     # for intl extension
     icu-dev
 
-RUN apk add --no-cache --virtual .persistent-deps \
+RUN apk apk update && apk add --no-cache --virtual .persistent-deps \
     bash \
     tzdata \
     # for composer
@@ -55,8 +55,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --version=1.10.1 --insta
 ENV LD_LIBRARY_PATH=/opt/oracle/instantclient
 ENV ORACLE_HOME=/opt/oracle/instantclient
 
-COPY ./instantclient-basic-linux.x64-12.1.0.2.0.zip /opt/oracle/
-COPY ./instantclient-sdk-linux.x64-12.1.0.2.0.zip /opt/oracle/
+COPY ../files/instantclient-basic-linux.x64-12.1.0.2.0.zip /opt/oracle/
+COPY ../files/instantclient-sdk-linux.x64-12.1.0.2.0.zip /opt/oracle/
 
 RUN unzip /opt/oracle/instantclient-basic-linux.x64-12.1.0.2.0.zip -d /opt/oracle/ \
     && unzip /opt/oracle/instantclient-sdk-linux.x64-12.1.0.2.0.zip -d /opt/oracle/ \
@@ -104,14 +104,30 @@ RUN docker-php-ext-configure gd \
 #         && make install \
 #         && make test
 
+RUN apk add --no-cache apache2
+
 # POST INSTALLATION
 RUN apk del .build-deps \
     && rm -rf /tmp/* \
     && rm -f /var/cache/apk/*
 
 # CONFIG PHP
-RUN echo "date.timezone = Asia/Vientiane" >> /usr/local/etc/php/conf.d/custom.ini
+RUN echo "date.timezone = Asia/Vientiane" >> /usr/local/etc/php/conf.d/custom.ini \
+    && sed -i "s/#LoadModule\ rewrite_module/LoadModule\ rewrite_module/" /etc/apache2/httpd.conf \
+    && sed -i "s/#LoadModule\ session_module/LoadModule\ session_module/" /etc/apache2/httpd.conf \
+    && sed -i "s/#LoadModule\ session_cookie_module/LoadModule\ session_cookie_module/" /etc/apache2/httpd.conf \
+    && sed -i "s/#LoadModule\ session_crypto_module/LoadModule\ session_crypto_module/" /etc/apache2/httpd.conf \
+    && sed -i "s/#LoadModule\ deflate_module/LoadModule\ deflate_module/" /etc/apache2/httpd.conf \
+    && sed -i "s#^DocumentRoot \".*#DocumentRoot \"/app/public\"#g" /etc/apache2/httpd.conf \
+    && sed -i "s#/var/www/localhost/htdocs#/var/www#" /etc/apache2/httpd.conf \
+    && printf "\n<Directory \"/var/www\">\n\tAllowOverride All\n</Directory>\n" >> /etc/apache2/httpd.conf
 
-RUN php -m
+COPY entrypoint-alpine.sh /sbin/
+RUN chmod +x /sbin/entrypoint-alpine.sh \
+    && chown -R apache:apache /var/www \
+    && chmod -R 755 /var/www
 
 WORKDIR /var/www
+
+EXPOSE 80
+ENTRYPOINT ["/sbin/entrypoint-alpine.sh"]
