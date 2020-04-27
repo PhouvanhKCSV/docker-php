@@ -1,2 +1,2 @@
-build-apache-7.4:
-	docker build -f Dockerfile-apache-7.4 -t phouvanhkcsv/php:apache-7.4 .
+build-7.4-apache:
+	docker build -f Dockerfile-7.4-apache -t phouvanhkcsv/php:7.4-apache .
